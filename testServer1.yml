@@ -1,0 +1,20 @@
+---
+- name: Setup testServer1
+  hosts: testServer1
+  become: yes
+  tasks:
+    - name: Install necessary packages
+      yum:
+        name:
+          - iproute
+          - iputils
+        state: present
+
+    - name: Configure VLAN for testServer1
+      command: ip link add link eth0 name eth0.10 type vlan id 10
+
+    - name: Assign IP address to VLAN
+      command: ip addr add 10.10.10.1/24 dev eth0.10
+
+    - name: Bring up VLAN interface
+      command: ip link set eth0.10 up

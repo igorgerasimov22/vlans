@@ -1,0 +1,32 @@
+---
+- name: Setup inetRouter
+  hosts: inetRouter
+  become: yes
+  tasks:
+    - name: Install necessary packages
+      yum:
+        name:
+          - iproute
+          - iputils
+        state: present
+
+    - name: Configure bond interfaces
+      command: ip link add bond0 type bond mode 802.3ad
+
+    - name: Add links to bond
+      command: ip link set eth1 master bond0
+      when: inventory_hostname == "inetRouter"
+
+    - name: Add second link to bond
+      command: ip link set eth2 master bond0
+      when: inventory_hostname == "inetRouter"
+
+    - name: Enable bond interface
+      command: ip link set bond0 up
+
+    - name: Enable IP forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: yes
